@@ -1,0 +1,1 @@
+DROP TABLE up_cache, up_cache_ttl;

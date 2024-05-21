@@ -1,0 +1,21 @@
+{
+	"name": "solovman/cache-handler",
+	"type": "project",
+	"description": "Implementation of the caching mechanism",
+	"license": "proprietary",
+	"autoload": {
+		"psr-4": {
+			"Up\\": "src/",
+			"Core\\": "core/"
+		}
+	},
+	"authors": [
+		{
+			"name": "Илья  Соловьев",
+			"email": "solovevilya3101@gmail.com"
+		}
+	],
+	"require": {
+		"ext-mysqli": "*"
+	}
+}
