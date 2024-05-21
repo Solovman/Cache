@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 use Up\Cache\CacheManager;
-use Up\Catalog\CategoryProvider;
 use Up\Cache\File\FileCache;
 use Up\Cache\Database\MySQLCache;
+use Up\Catalog\CategoryProvider;
 
 require_once $_SERVER['DOCUMENT_ROOT'] . '/../boot.php';
 

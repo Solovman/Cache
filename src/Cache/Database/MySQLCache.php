@@ -30,22 +30,17 @@ class MySQLCache extends DatabaseCache
 
 	public function set(string $key, mixed $value, int $ttl): void
 	{
-		$stmt = $this->connection->prepare("REPLACE INTO up_cache (cache_key, cache_value) VALUES (?, ?)");
+		$ttl = (time() + $ttl);
+		$stmt = $this->connection->prepare("REPLACE INTO up_cache (cache_key, cache_value, ttl) VALUES (?, ?, ?)");
 		$serialize = serialize($value);
-		$stmt->bind_param("ss", $key, $serialize);
+		$stmt->bind_param("ssi", $key, $serialize, $ttl);
 		$stmt->execute();
 		$stmt->close();
-
-		$stmtTtl = $this->connection->prepare("REPLACE INTO up_cache_ttl (cache_key, ttl) VALUES (?, ?)");
-		$str = (string)(time() + $ttl);
-		$stmtTtl->bind_param("si", $key, $str);
-		$stmtTtl->execute();
-		$stmtTtl->close();
 	}
 
 	public function get(string $key): mixed
 	{
-		$stmt = $this->connection->prepare("SELECT cache_value, ttl FROM up_cache JOIN up_cache_ttl ON up_cache.cache_key = up_cache_ttl.cache_key WHERE up_cache.cache_key = ?");
+		$stmt = $this->connection->prepare("SELECT cache_value, ttl FROM up_cache WHERE cache_key = ?");
 		$stmt->bind_param("s", $key);
 		$stmt->execute();
 
@@ -65,7 +60,6 @@ class MySQLCache extends DatabaseCache
 	public function removeAll(): void
 	{
 		$this->connection->query("TRUNCATE TABLE up_cache");
-		$this->connection->query("TRUNCATE TABLE up_cache_ttl");
 	}
 
 	public function removeByKey(string $key): void
@@ -74,10 +68,5 @@ class MySQLCache extends DatabaseCache
 		$stmt->bind_param("s", $key);
 		$stmt->execute();
 		$stmt->close();
-
-		$stmtTtl = $this->connection->prepare("DELETE FROM up_cache_ttl WHERE cache_key = ?");
-		$stmtTtl->bind_param("s", $key);
-		$stmtTtl->execute();
-		$stmtTtl->close();
 	}
 }
