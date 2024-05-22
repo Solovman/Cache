@@ -22,25 +22,6 @@ class FileCache implements CacheStrategy
 		file_put_contents($path, serialize($data));
 
 	}
-	public function get(string $key): mixed
-	{
-		$path = $this->getFilePath($key);
-
-		if (!file_exists($path))
-		{
-			return null;
-		}
-
-		$data = unserialize(file_get_contents($path), ['allowed_classes' => false]);
-		$ttl = $data['ttl'];
-
-		if (time() > $ttl)
-		{
-			return null;
-		}
-
-		return $data;
-	}
 
 	public function removeAll(): void
 	{
@@ -64,9 +45,50 @@ class FileCache implements CacheStrategy
 		}
 	}
 
+	public function get(string $key): ?array
+	{
+		$fileContent = $this->getFile($key);
+		$data = $this->readData($fileContent);
+
+		return $this->getDataIfNotExpired($data);
+	}
+
+	private function getDataIfNotExpired(?array $data): ?array
+	{
+		if ($data === null || time() > $data['ttl'])
+		{
+			return null;
+		}
+
+		return $data;
+	}
+
+	private function readData(?string $fileContent): ?array
+	{
+		if ($fileContent === null)
+		{
+			return null;
+		}
+
+		return unserialize($fileContent, ['allowed_classes' => false]);
+	}
+
+	private function getFile(string $key): ?string
+	{
+		$path = $this->getFilePath($key);
+
+		if (!file_exists($path))
+		{
+			return null;
+		}
+
+		return file_get_contents($path);
+	}
+
 	private function getFilePath(string $key): string
 	{
 		$hash = sha1($key);
-		return self::CACHE_PATH . $key . $hash . '.php';
+
+		return self::CACHE_PATH . $hash . '.txt';
 	}
 }
