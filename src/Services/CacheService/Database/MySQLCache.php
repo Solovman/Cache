@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Up\Services\CacheService\Database;
 
-use Up\Repository\CacheRepository;
-
 class MySQLCache extends DatabaseCache
 {
 	public function set(string $key, mixed $value, int $ttl): void
@@ -17,7 +15,9 @@ class MySQLCache extends DatabaseCache
 	{
 		$row = $this->cacheRepository->selectCacheByKey($key);
 
-		if ($row && time() <= (int)$row['ttl'])
+		$cacheIsValid = $row && time() <= (int)$row['ttl'];
+
+		if ($cacheIsValid)
 		{
 			return unserialize($row['cache_value'], ['allowed_classes' => false]);
 		}

@@ -18,15 +18,11 @@ class CacheManager
 		$this->cacheStrategy = $cacheStrategy;
 	}
 
-	public function getCacheStrategy(): CacheStrategy
-	{
-		return $this->cacheStrategy;
-	}
-
 	public function removeAllCache(CacheStrategy $cacheStrategy): void
 	{
 		$cacheStrategy->removeAll();
 	}
+
 	public function removeCacheByKey(CacheStrategy $cacheStrategy, string $key): void
 	{
 		$cacheStrategy->removeByKey($key);
@@ -41,7 +37,7 @@ class CacheManager
 			// Удаляем элемент кэша в том случае, когда он устарел
 			$this->removeCacheByKey($cacheStrategy, $key);
 
-			var_dump(static::class .': Slow data');
+			var_dump(static::class . ': Slow data');
 			$value = $fetcher();
 
 			// Кладем данные в файловый кэш
@@ -51,6 +47,7 @@ class CacheManager
 		}
 
 		var_dump(static::class . ': Fast data from cache');
+
 		return $data;
 	}
 
