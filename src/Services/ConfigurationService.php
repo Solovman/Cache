@@ -8,29 +8,34 @@ use RuntimeException;
 
 class ConfigurationService
 {
+	private const MASTER_CONFIG_PATH = ROOT . '/config/config.php';
+	private const LOCAL_CONFIG_PATH = ROOT . '/config/local-config.php';
+
+	private static ?array $config = null;
+
 	public static function option(string $name, mixed $defaultValue = null): mixed
 	{
-		/**@var array $config */
-		static $config = null;
-
-		if ($config === null)
+		if (self::$config === null)
 		{
-			$masterConfig = require_once ROOT . '/config/config.php';
-			if (file_exists(ROOT . '/config/local-config.php'))
-			{
-				$localConfig = require_once ROOT . '/config/local-config.php';
-			}
-			else
-			{
-				$localConfig = [];
-			}
-
-			$config = array_merge($masterConfig, $localConfig);
+			self::$config = self::loadConfig();
 		}
 
-		if (array_key_exists($name, $config))
+		return self::getConfigOption($name, $defaultValue);
+	}
+
+	private static function loadConfig(): array
+	{
+		$masterConfig = require_once self::MASTER_CONFIG_PATH;
+		$localConfig = file_exists(self::LOCAL_CONFIG_PATH) ? require_once self::LOCAL_CONFIG_PATH : [];
+
+		return array_merge($masterConfig, $localConfig);
+	}
+
+	private static function getConfigOption(string $name, mixed $defaultValue): mixed
+	{
+		if (array_key_exists($name, self::$config))
 		{
-			return $config[$name];
+			return self::$config[$name];
 		}
 
 		if ($defaultValue !== null)
