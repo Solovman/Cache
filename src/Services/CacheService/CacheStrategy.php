@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Up\Cache;
+namespace Up\Services\CacheService;
 
 interface CacheStrategy
 {

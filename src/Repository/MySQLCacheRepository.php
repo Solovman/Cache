@@ -2,17 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Up\Cache\Database;
+namespace Up\Repository;
 
-use Core\Database\MySQLConnection;
-use Exception;
 use mysqli;
-use Up\Cache\Traits\Cacheable;
+use Exception;
+use Core\Database\MySQLConnection;
 
-class MySQLCache extends DatabaseCache
+class MySQLCacheRepository implements CacheRepository
 {
-	use Cacheable;
-
 	private mysqli $connection;
 
 	/**
@@ -21,14 +18,10 @@ class MySQLCache extends DatabaseCache
 	public function __construct()
 	{
 		$this->connection = MySQLConnection::get();
-		if ($this->connection->connect_error)
-		{
-			die("Connection error: " . $this->connection->connect_error);
-		}
 
 	}
 
-	public function set(string $key, mixed $value, int $ttl): void
+	public function replaceIntoCache(string $key, mixed $value, int $ttl): void
 	{
 		$ttl = (time() + $ttl);
 		$stmt = $this->connection->prepare("REPLACE INTO up_cache (cache_key, cache_value, ttl) VALUES (?, ?, ?)");
@@ -38,7 +31,7 @@ class MySQLCache extends DatabaseCache
 		$stmt->close();
 	}
 
-	public function get(string $key): mixed
+	public function selectCacheByKey(string $key): ?array
 	{
 		$stmt = $this->connection->prepare("SELECT cache_value, ttl FROM up_cache WHERE cache_key = ?");
 		$stmt->bind_param("s", $key);
@@ -48,21 +41,15 @@ class MySQLCache extends DatabaseCache
 		$row = $result->fetch_assoc();
 		$stmt->close();
 
-		if ($row && time() <= (int) $row['ttl'])
-		{
-			return unserialize($row['cache_value'], ['allowed_classes' => false]);
-		}
-
-		// Если время жизни кэша истекло или данных кэша нет, возвращаем null
-		return null;
+		return $row;
 	}
 
-	public function removeAll(): void
+	public function removeAllCache(): void
 	{
 		$this->connection->query("TRUNCATE TABLE up_cache");
 	}
 
-	public function removeByKey(string $key): void
+	public function removeCacheByKey(string $key): void
 	{
 		$stmt = $this->connection->prepare("DELETE FROM up_cache WHERE cache_key = ?");
 		$stmt->bind_param("s", $key);

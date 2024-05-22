@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Up\Catalog;
+namespace Up\Providers;
 
 class CategoryProvider
 {

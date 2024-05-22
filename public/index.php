@@ -2,23 +2,24 @@
 
 declare(strict_types=1);
 
-use Up\Cache\CacheManager;
-use Up\Cache\File\FileCache;
-use Up\Cache\Database\MySQLCache;
-use Up\Catalog\CategoryProvider;
+use Up\Providers\CategoryProvider;
+use Up\Repository\MySQLCacheRepository;
+use Up\Services\CacheService\CacheManager;
+use Up\Services\CacheService\Database\MySQLCache;
+use Up\Services\CacheService\File\FileCache;
 
 require_once $_SERVER['DOCUMENT_ROOT'] . '/../boot.php';
 
 //Выбираем нужный тип кэширования (Файл/БД)
-// $fileCache = new FileCache();
-$mySqlCache = new MySQLCache();
+$fileCache = new FileCache();
+// $mySqlCache = new MySQLCache(new MySQLCacheRepository());
 
-$cacheManager = new CacheManager($mySqlCache);
+$cacheManager = new CacheManager($fileCache);
 $cacheKey = 'CategoryName';
 $ttl = 10;
 
 // Получаем данные из кэша
-$categories = $cacheManager->getCacheStrategy()->remember($cacheKey, $ttl, function(){
+$categories = $cacheManager->remember($fileCache, $cacheKey, $ttl, function(){
 
 	// Прямой запрос к провайдеру
 	return (new CategoryProvider())->getCategories();
@@ -27,7 +28,7 @@ $categories = $cacheManager->getCacheStrategy()->remember($cacheKey, $ttl, funct
 var_dump($categories);
 
 // Удаление всего кэша
-// $cacheManager->removeAllCache($mySqlCache);
+// $cacheManager->removeAllCache($fileCache);
 
 // Удаление конкретного кэша
-// $cacheManager->removeCacheByKey($mySqlCache, $cacheKey);
+// $cacheManager->removeCacheByKey($fileCache, $cacheKey);

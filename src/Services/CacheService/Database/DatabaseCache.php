@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Up\Cache\Database;
+namespace Up\Services\CacheService\Database;
 
-use Up\Cache\CacheStrategy;
+use Up\Services\CacheService\CacheStrategy;
 
 abstract class DatabaseCache implements CacheStrategy
 {

@@ -2,16 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Up\Cache\File;
+namespace Up\Services\CacheService\File;
 
-use Closure;
-use Up\Cache\CacheStrategy;
-use Up\Cache\Traits\Cacheable;
+use Up\Services\CacheService\CacheStrategy;
 
 class FileCache implements CacheStrategy
 {
-	use Cacheable;
-
 	public function set(string $key, mixed $value, int $ttl): void
 	{
 		$hash = sha1($key);
