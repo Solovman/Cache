@@ -8,10 +8,11 @@ use Up\Services\CacheService\CacheStrategy;
 
 class FileCache implements CacheStrategy
 {
+	private const CACHE_PATH = ROOT . '/var/cache/';
+
 	public function set(string $key, mixed $value, int $ttl): void
 	{
-		$hash = sha1($key);
-		$path = ROOT . '/var/cache/' . $key . $hash . '.php';
+		$path = $this->getFilePath($key);
 
 		$data = [
 			'data' => $value,
@@ -23,8 +24,7 @@ class FileCache implements CacheStrategy
 	}
 	public function get(string $key): mixed
 	{
-		$hash = sha1($key);
-		$path = ROOT . '/var/cache/' . $key . $hash . '.php';
+		$path = $this->getFilePath($key);
 
 		if (!file_exists($path))
 		{
@@ -44,9 +44,9 @@ class FileCache implements CacheStrategy
 
 	public function removeAll(): void
 	{
-		if (file_exists(ROOT . '/var/cache/'))
+		if (file_exists(self::CACHE_PATH))
 		{
-			foreach (glob(ROOT . '/var/cache/*') as $file)
+			foreach (glob(self::CACHE_PATH . '*') as $file)
 			{
 				unlink($file);
 			}
@@ -55,12 +55,18 @@ class FileCache implements CacheStrategy
 
 	public function removeByKey(string $key): void
 	{
-		if (file_exists(ROOT . '/var/cache/'))
+		if (file_exists(self::CACHE_PATH))
 		{
-			foreach (glob(ROOT . "/var/cache/$key*") as $file)
+			foreach (glob(self::CACHE_PATH . "$key*") as $file)
 			{
 				unlink($file);
 			}
 		}
+	}
+
+	private function getFilePath(string $key): string
+	{
+		$hash = sha1($key);
+		return self::CACHE_PATH . $key . $hash . '.php';
 	}
 }

@@ -8,13 +8,6 @@ use Up\Repository\CacheRepository;
 
 class MySQLCache extends DatabaseCache
 {
-	private CacheRepository $cacheRepository;
-
-	public function __construct(CacheRepository $cacheRepository)
-	{
-		$this->cacheRepository = $cacheRepository;
-	}
-
 	public function set(string $key, mixed $value, int $ttl): void
 	{
 		$this->cacheRepository->replaceIntoCache($key, $value, $ttl);
